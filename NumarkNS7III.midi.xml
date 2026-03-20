@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Numark NS7III — Mixxx 2.4+ MIDI mapping
+  Derived from djcmd ns7iii_map.h / djcmd_config.h
+
+  Hardware layout:
+    Ch1  (0xB0/0x90) global: crossfader, master/booth vol, library, FX, deck-sel
+    Ch2  (0xB1/0x91) left platter:  Deck A (default) / Deck C (layer 2)
+    Ch3  (0xB2/0x92) right platter: Deck B (default) / Deck D (layer 2)
+
+  Layer switching (deck_sel buttons on Ch1):
+    note 2 → left=A   note 3 → right=B
+    note 4 → left=C   note 5 → right=D
+  Layer switching requires scripting; see NumarkNS7III.js.
+
+  Motor protocol (CC on ChN, N = deck channel):
+    CC65=127  START   CC66=127 STOP
+    CC69=0    FORWARD CC70=1  REVERSE
+    CC73 0→100 ramp over 18 steps at 20Hz (spinup)
+    CC75=0 on Ch1: global enable (one-shot before first start)
+  All motor logic is in NumarkNS7III.js.
+
+  Jog wheels:
+    CC0  (Ch2/3) — incremental spin encoder (center-64: >64=fwd <64=rev)
+    PB   (Ch2/3) — pitch-bend axis (scratch/nudge depending on touch state)
+  Jog handling (scratch vs nudge) is in NumarkNS7III.js.
+
+  EQ strip physical order left→right: Ch3, Ch1, Ch2, Ch4
+-->
+
+<MixxxMIDIPreset schemaVersion="1" mixxxVersion="2.4+">
+  <info>
+    <name>Numark NS7III</name>
+    <author>djcmd project</author>
+    <description>NS7III 4-deck mapping with motor control (djcmd-alpha-2)</description>
+  </info>
+
+  <controller id="NS7 III">
+    <scriptfiles>
+      <file filename="NumarkNS7III.js" functionprefix="NS7III"/>
+    </scriptfiles>
+
+    <controls>
+      <!-- ── Mixer ─────────────────────────────────────────────── -->
+      <!-- Crossfader: Ch1 CC7 -->
+      <control><group>[Master]</group><key>crossfader</key>
+        <status>0xB0</status><midino>7</midino><options><normal/></options></control>
+      <!-- Master volume: Ch1 CC66 -->
+      <control><group>[Master]</group><key>gain</key>
+        <status>0xB0</status><midino>66</midino><options><normal/></options></control>
+      <!-- Booth volume: Ch1 CC67 -->
+      <control><group>[Master]</group><key>booth_gain</key>
+        <status>0xB0</status><midino>67</midino><options><normal/></options></control>
+
+      <!-- ── Deck A volumes / EQ / gain / filter (Ch1 CCs) ────── -->
+      <control><group>[Channel1]</group><key>volume</key>
+        <status>0xB0</status><midino>8</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>pregain</key>
+        <status>0xB0</status><midino>12</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>filterLow</key>
+        <status>0xB0</status><midino>9</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>filterMid</key>
+        <status>0xB0</status><midino>10</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>filterHigh</key>
+        <status>0xB0</status><midino>11</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>super1</key>
+        <status>0xB0</status><midino>91</midino><options><normal/></options></control>
+
+      <!-- ── Deck B volumes / EQ / gain / filter ───────────────── -->
+      <control><group>[Channel2]</group><key>volume</key>
+        <status>0xB0</status><midino>13</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>pregain</key>
+        <status>0xB0</status><midino>17</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>filterLow</key>
+        <status>0xB0</status><midino>14</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>filterMid</key>
+        <status>0xB0</status><midino>15</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>filterHigh</key>
+        <status>0xB0</status><midino>16</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>super1</key>
+        <status>0xB0</status><midino>92</midino><options><normal/></options></control>
+
+      <!-- ── Deck C / D volumes / EQ (mixer strips Ch3/Ch4) ────── -->
+      <control><group>[Channel3]</group><key>volume</key>
+        <status>0xB0</status><midino>19</midino><options><normal/></options></control>
+      <control><group>[Channel3]</group><key>pregain</key>
+        <status>0xB0</status><midino>23</midino><options><normal/></options></control>
+      <control><group>[Channel3]</group><key>filterLow</key>
+        <status>0xB0</status><midino>20</midino><options><normal/></options></control>
+      <control><group>[Channel3]</group><key>filterMid</key>
+        <status>0xB0</status><midino>21</midino><options><normal/></options></control>
+      <control><group>[Channel3]</group><key>filterHigh</key>
+        <status>0xB0</status><midino>22</midino><options><normal/></options></control>
+      <control><group>[Channel3]</group><key>super1</key>
+        <status>0xB0</status><midino>90</midino><options><normal/></options></control>
+
+      <control><group>[Channel4]</group><key>volume</key>
+        <status>0xB0</status><midino>24</midino><options><normal/></options></control>
+      <control><group>[Channel4]</group><key>pregain</key>
+        <status>0xB0</status><midino>28</midino><options><normal/></options></control>
+      <control><group>[Channel4]</group><key>filterLow</key>
+        <status>0xB0</status><midino>25</midino><options><normal/></options></control>
+      <control><group>[Channel4]</group><key>filterMid</key>
+        <status>0xB0</status><midino>26</midino><options><normal/></options></control>
+      <control><group>[Channel4]</group><key>filterHigh</key>
+        <status>0xB0</status><midino>27</midino><options><normal/></options></control>
+      <control><group>[Channel4]</group><key>super1</key>
+        <status>0xB0</status><midino>93</midino><options><normal/></options></control>
+
+      <!-- ── Pitch faders (Ch2/3 CC1) ──────────────────────────── -->
+      <!-- Mapped via script so layer switching redirects to C/D -->
+      <control><group>[Channel1]</group><key>rate</key>
+        <status>0xB1</status><midino>1</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>rate</key>
+        <status>0xB2</status><midino>1</midino><options><normal/></options></control>
+
+      <!-- ── Jog wheels — script handles scratch vs nudge ─────── -->
+      <!-- jog_spin_a: Ch2 CC0 (center-64 relative) -->
+      <control><group>[Channel1]</group><key>jog</key>
+        <status>0xB1</status><midino>0</midino>
+        <options><script-binding/></options>
+        <key>NS7III.jogSpin</key></control>
+      <!-- jog_pb_a: Ch2 Pitch Bend (0xE1) -->
+      <control><group>[Channel1]</group><key>jog</key>
+        <status>0xE1</status><midino>0</midino>
+        <options><script-binding/></options>
+        <key>NS7III.jogPB</key></control>
+      <!-- jog_spin_b: Ch3 CC0 -->
+      <control><group>[Channel2]</group><key>jog</key>
+        <status>0xB2</status><midino>0</midino>
+        <options><script-binding/></options>
+        <key>NS7III.jogSpin</key></control>
+      <!-- jog_pb_b: Ch3 Pitch Bend (0xE2) -->
+      <control><group>[Channel2]</group><key>jog</key>
+        <status>0xE2</status><midino>0</midino>
+        <options><script-binding/></options>
+        <key>NS7III.jogPB</key></control>
+
+      <!-- ── Strip touch (Ch2/3 CC2) — enables scratch mode ───── -->
+      <control><group>[Channel1]</group><key>scratch2_enable</key>
+        <status>0xB1</status><midino>2</midino>
+        <options><script-binding/></options>
+        <key>NS7III.stripTouch</key></control>
+      <control><group>[Channel2]</group><key>scratch2_enable</key>
+        <status>0xB2</status><midino>2</midino>
+        <options><script-binding/></options>
+        <key>NS7III.stripTouch</key></control>
+
+      <!-- ── Transport: PLAY (script → motor + play toggle) ────── -->
+      <!-- play_a: Ch2 note 52 -->
+      <control><group>[Channel1]</group><key>play</key>
+        <status>0x91</status><midino>52</midino>
+        <options><script-binding/></options>
+        <key>NS7III.playDeckA</key></control>
+      <!-- play_b: Ch3 note 52 -->
+      <control><group>[Channel2]</group><key>play</key>
+        <status>0x92</status><midino>52</midino>
+        <options><script-binding/></options>
+        <key>NS7III.playDeckB</key></control>
+
+      <!-- ── CUE (default): jump/set/hold cue ──────────────────── -->
+      <!-- cue_default_a: Ch2 note 51 -->
+      <control><group>[Channel1]</group><key>cue_default</key>
+        <status>0x91</status><midino>51</midino><options><normal/></options></control>
+      <!-- cue_default_b: Ch3 note 51 -->
+      <control><group>[Channel2]</group><key>cue_default</key>
+        <status>0x92</status><midino>51</midino><options><normal/></options></control>
+
+      <!-- ── SYNC ──────────────────────────────────────────────── -->
+      <!-- pitch_range button doubles as SYNC in djcmd (note 61) -->
+      <control><group>[Channel1]</group><key>beatsync</key>
+        <status>0x91</status><midino>61</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>beatsync</key>
+        <status>0x92</status><midino>61</midino><options><normal/></options></control>
+
+      <!-- ── SLIP (motor_toggle button = note 68) ──────────────── -->
+      <control><group>[Channel1]</group><key>slip_enabled</key>
+        <status>0x91</status><midino>68</midino><options><toggle/></options></control>
+      <control><group>[Channel2]</group><key>slip_enabled</key>
+        <status>0x92</status><midino>68</midino><options><toggle/></options></control>
+
+      <!-- ── REVERSE (loop_out button = note 63 in djcmd) ─────── -->
+      <control><group>[Channel1]</group><key>reverse</key>
+        <status>0x91</status><midino>63</midino><options><toggle/></options></control>
+      <control><group>[Channel2]</group><key>reverse</key>
+        <status>0x92</status><midino>63</midino><options><toggle/></options></control>
+
+      <!-- ── Pads 1-8: hotcue activate (deck A Ch2 notes 71-78) ── -->
+      <control><group>[Channel1]</group><key>hotcue_1_activate</key>
+        <status>0x91</status><midino>71</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>hotcue_2_activate</key>
+        <status>0x91</status><midino>72</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>hotcue_3_activate</key>
+        <status>0x91</status><midino>73</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>hotcue_4_activate</key>
+        <status>0x91</status><midino>74</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>hotcue_5_activate</key>
+        <status>0x91</status><midino>75</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>hotcue_6_activate</key>
+        <status>0x91</status><midino>76</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>hotcue_7_activate</key>
+        <status>0x91</status><midino>77</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>hotcue_8_activate</key>
+        <status>0x91</status><midino>78</midino><options><normal/></options></control>
+
+      <!-- ── Pads 1-8: hotcue activate (deck B Ch3 notes 71-78) ── -->
+      <control><group>[Channel2]</group><key>hotcue_1_activate</key>
+        <status>0x92</status><midino>71</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>hotcue_2_activate</key>
+        <status>0x92</status><midino>72</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>hotcue_3_activate</key>
+        <status>0x92</status><midino>73</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>hotcue_4_activate</key>
+        <status>0x92</status><midino>74</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>hotcue_5_activate</key>
+        <status>0x92</status><midino>75</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>hotcue_6_activate</key>
+        <status>0x92</status><midino>76</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>hotcue_7_activate</key>
+        <status>0x92</status><midino>77</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>hotcue_8_activate</key>
+        <status>0x92</status><midino>78</midino><options><normal/></options></control>
+
+      <!-- ── Nudge buttons (deck A: Ch2 notes 59/60) ───────────── -->
+      <control><group>[Channel1]</group><key>rate_temp_down</key>
+        <status>0x91</status><midino>59</midino><options><normal/></options></control>
+      <control><group>[Channel1]</group><key>rate_temp_up</key>
+        <status>0x91</status><midino>60</midino><options><normal/></options></control>
+      <!-- Deck B nudge: Ch3 notes 59/60 -->
+      <control><group>[Channel2]</group><key>rate_temp_down</key>
+        <status>0x92</status><midino>59</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>rate_temp_up</key>
+        <status>0x92</status><midino>60</midino><options><normal/></options></control>
+
+      <!-- ── Pitch center (note 64): reset rate to 0 ───────────── -->
+      <control><group>[Channel1]</group><key>rate_set_zero</key>
+        <status>0x91</status><midino>64</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>rate_set_zero</key>
+        <status>0x92</status><midino>64</midino><options><normal/></options></control>
+
+      <!-- ── Library encoder (Ch1 CC3, center-64 relative) ─────── -->
+      <control><group>[Library]</group><key>MoveVertical</key>
+        <status>0xB0</status><midino>3</midino><options><selectknob/></options></control>
+      <!-- lib_select: Ch1 note 8 → load highlighted to active deck -->
+      <control><group>[Library]</group><key>GoToItem</key>
+        <status>0x90</status><midino>8</midino><options><normal/></options></control>
+      <!-- lib_back / lib_fwd: Ch1 notes 6/7 -->
+      <control><group>[Library]</group><key>MoveLeft</key>
+        <status>0x90</status><midino>6</midino><options><normal/></options></control>
+      <control><group>[Library]</group><key>MoveRight</key>
+        <status>0x90</status><midino>7</midino><options><normal/></options></control>
+
+      <!-- ── Load buttons: lib_load_a/b (Ch2/3 note 49) ────────── -->
+      <!-- Routes to active layer deck via script -->
+      <control><group>[Channel1]</group><key>LoadSelectedTrack</key>
+        <status>0x91</status><midino>49</midino><options><normal/></options></control>
+      <control><group>[Channel2]</group><key>LoadSelectedTrack</key>
+        <status>0x92</status><midino>49</midino><options><normal/></options></control>
+
+      <!-- ── Deck layer selectors (Ch1 notes 2-5) ─────────────── -->
+      <!-- Note: layer switching (A↔C, B↔D) is handled by NS7III.js -->
+      <control><group>[Channel1]</group><key>deck_select</key>
+        <status>0x90</status><midino>2</midino>
+        <options><script-binding/></options>
+        <key>NS7III.deckSel1</key></control>
+      <control><group>[Channel2]</group><key>deck_select</key>
+        <status>0x90</status><midino>3</midino>
+        <options><script-binding/></options>
+        <key>NS7III.deckSel2</key></control>
+      <control><group>[Channel3]</group><key>deck_select</key>
+        <status>0x90</status><midino>4</midino>
+        <options><script-binding/></options>
+        <key>NS7III.deckSel3</key></control>
+      <control><group>[Channel4]</group><key>deck_select</key>
+        <status>0x90</status><midino>5</midino>
+        <options><script-binding/></options>
+        <key>NS7III.deckSel4</key></control>
+
+      <!-- ── FX buttons (Ch1 notes 15/16/18 deck-A slot, 19/20/22 deck-B) -->
+      <control><group>[EffectRack1_EffectUnit1]</group><key>enabled</key>
+        <status>0x90</status><midino>15</midino><options><toggle/></options></control>
+      <control><group>[EffectRack1_EffectUnit2]</group><key>enabled</key>
+        <status>0x90</status><midino>16</midino><options><toggle/></options></control>
+      <control><group>[EffectRack1_EffectUnit1]</group><key>mix</key>
+        <status>0x90</status><midino>18</midino><options><normal/></options></control>
+      <control><group>[EffectRack1_EffectUnit3]</group><key>enabled</key>
+        <status>0x90</status><midino>19</midino><options><toggle/></options></control>
+      <control><group>[EffectRack1_EffectUnit4]</group><key>enabled</key>
+        <status>0x90</status><midino>20</midino><options><toggle/></options></control>
+      <control><group>[EffectRack1_EffectUnit3]</group><key>mix</key>
+        <status>0x90</status><midino>22</midino><options><normal/></options></control>
+    </controls>
+
+    <!-- ── Outputs (LEDs) ──────────────────────────────────────── -->
+    <outputs>
+      <!-- Play LED: same note as input -->
+      <output><group>[Channel1]</group><key>play_indicator</key>
+        <status>0x91</status><midino>52</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>play_indicator</key>
+        <status>0x92</status><midino>52</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+
+      <!-- Cue LED -->
+      <output><group>[Channel1]</group><key>cue_indicator</key>
+        <status>0x91</status><midino>51</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>cue_indicator</key>
+        <status>0x92</status><midino>51</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+
+      <!-- Sync LED (pitch_range button) -->
+      <output><group>[Channel1]</group><key>sync_enabled</key>
+        <status>0x91</status><midino>61</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>sync_enabled</key>
+        <status>0x92</status><midino>61</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+
+      <!-- Slip LED (motor_toggle button) -->
+      <output><group>[Channel1]</group><key>slip_enabled</key>
+        <status>0x91</status><midino>68</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>slip_enabled</key>
+        <status>0x92</status><midino>68</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+
+      <!-- Deck selector LEDs (Ch1 notes 2-5) -->
+      <output><group>[Channel1]</group><key>play_indicator</key>
+        <status>0x90</status><midino>2</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>play_indicator</key>
+        <status>0x90</status><midino>3</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel3]</group><key>play_indicator</key>
+        <status>0x90</status><midino>4</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel4]</group><key>play_indicator</key>
+        <status>0x90</status><midino>5</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+
+      <!-- Hotcue pad LEDs deck A -->
+      <output><group>[Channel1]</group><key>hotcue_1_enabled</key>
+        <status>0x91</status><midino>71</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel1]</group><key>hotcue_2_enabled</key>
+        <status>0x91</status><midino>72</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel1]</group><key>hotcue_3_enabled</key>
+        <status>0x91</status><midino>73</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel1]</group><key>hotcue_4_enabled</key>
+        <status>0x91</status><midino>74</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel1]</group><key>hotcue_5_enabled</key>
+        <status>0x91</status><midino>75</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel1]</group><key>hotcue_6_enabled</key>
+        <status>0x91</status><midino>76</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel1]</group><key>hotcue_7_enabled</key>
+        <status>0x91</status><midino>77</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel1]</group><key>hotcue_8_enabled</key>
+        <status>0x91</status><midino>78</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+
+      <!-- Hotcue pad LEDs deck B -->
+      <output><group>[Channel2]</group><key>hotcue_1_enabled</key>
+        <status>0x92</status><midino>71</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>hotcue_2_enabled</key>
+        <status>0x92</status><midino>72</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>hotcue_3_enabled</key>
+        <status>0x92</status><midino>73</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>hotcue_4_enabled</key>
+        <status>0x92</status><midino>74</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>hotcue_5_enabled</key>
+        <status>0x92</status><midino>75</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>hotcue_6_enabled</key>
+        <status>0x92</status><midino>76</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>hotcue_7_enabled</key>
+        <status>0x92</status><midino>77</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+      <output><group>[Channel2]</group><key>hotcue_8_enabled</key>
+        <status>0x92</status><midino>78</midino>
+        <on>0x7F</on><off>0x00</off><minimum>0.5</minimum></output>
+    </outputs>
+  </controller>
+</MixxxMIDIPreset>
