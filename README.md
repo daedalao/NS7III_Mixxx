@@ -7,7 +7,7 @@
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓███████▓▒░ ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░
 ```
-
+# Byproduct of the djcmd project
 # Numark NS7III Mapping (Mixxx 2.5.4)
 
 ## 1. Core Architecture
@@ -52,6 +52,5 @@
 *   **Encoder:** `GoToItem` (Note 8)
 *   **Touch:** 108 (Explicitly Ignored)
 
-## 6. Requirements
 *   **Mixxx Version:** 2.5.4+
 *   **Preferences:** `Invert Rate Fader` [ENABLED] for turntable-correct motor sync.
