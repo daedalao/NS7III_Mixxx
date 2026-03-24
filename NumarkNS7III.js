@@ -109,10 +109,16 @@ NS7III.jogSpin = function(c, n, v, s, g) {
     var delta = v - NS7III.jogLastCoarse[side];
     if (delta > 64) delta -= 128; else if (delta < -64) delta += 128;
     
-    NS7III.jogLastDelta[side] = delta; 
+    // Tiny hysteresis to prevent motor "shiver" while holding
+    var effectiveDelta = delta;
+    if (NS7III.isTouching[side] && Math.abs(delta) < 2) {
+        effectiveDelta = 0; 
+    }
+
+    NS7III.jogLastDelta[side] = effectiveDelta; 
     NS7III.lastSpinTime[side] = new Date().getTime(); 
     
-    if (NS7III.isTouching[side]) engine.scratchTick(deck, delta);
+    if (NS7III.isTouching[side]) engine.scratchTick(deck, effectiveDelta);
     NS7III.jogLastCoarse[side] = v;
 };
 
@@ -128,18 +134,17 @@ NS7III.jogPB = function(c, n, v, s, g) {
     var effectiveHandDelta = (now - NS7III.lastSpinTime[side] > 30) ? 0 : NS7III.jogLastDelta[side];
     var slipError = Math.abs(deltaPB - (effectiveHandDelta * NS7III.PB_RATIO));
     
-    // Slip Detected (Grabbing or Moving the vinyl against the motor)
-    if (slipError > 500 || (effectiveHandDelta === 0 && NS7III.motorRunning[side] && Math.abs(deltaPB) > 100)) {
-        NS7III.releaseConfidence[side] = 0; // Reset release counter on any slip packet
+    // Core Slip Detection: If motor and hand are out of sync, we are scratching
+    if (slipError > 600) {
+        NS7III.releaseConfidence[side] = 0; 
         if (!NS7III.isTouching[side]) { 
             engine.scratchEnable(deck, NS7III.RES, 33.333, 1.0, 1.0/32.0, false, false); 
             NS7III.isTouching[side] = true; 
         }
     } else { 
-        // Sync Detected (Vinyl is spinning at motor speed)
+        // Sync Detected: Require 8 packets of perfect agreement to release
         if (NS7III.isTouching[side]) {
             NS7III.releaseConfidence[side]++;
-            // Exit Confidence: Require 8 consecutive packets of perfect sync to release
             if (NS7III.releaseConfidence[side] >= 8) {
                 NS7III.isTouching[side] = false;
                 NS7III.releaseConfidence[side] = 0;
