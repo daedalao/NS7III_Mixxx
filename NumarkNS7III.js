@@ -31,7 +31,11 @@ NS7III.jogLastPB     = [8192, 8192];
 NS7III.isTouching    = [false, false];
 NS7III.touchTimer    = [0, 0];
 NS7III.confirmCount  = [0, 0];
+NS7III.releaseConfidence = [0, 0]; // Packets required to confirm a release
 NS7III.lsbBEATS      = [0, 0]; 
+NS7III.lastSpinTime  = [0, 0]; 
+NS7III.lastSentRPM   = [0, 0]; 
+NS7III.lsbPitch      = [0, 0]; 
 
 // Helpers
 NS7III.deckForSide = function(side) { 
@@ -46,13 +50,19 @@ NS7III.syncPhysicalMotor = function(side, rate) {
     if (!NS7III.motorRunning[side]) return;
     var ch = NS7III.MOTOR_CH[side];
     var deck = NS7III.deckForSide(side);
-    var isReverse = engine.getValue("[Channel"+deck+"]", "reverse");
-    var targetRPM = Math.round(64 + ((isReverse ? -rate : rate) * 32));
+    var group = "[Channel"+deck+"]";
+    var isReverse = engine.getValue(group, "reverse");
+    var currentRange = engine.getValue(group, "rateRange");
+    
+    var effectiveRate = rate * currentRange;
+    var targetRPM = Math.round(64 + ((isReverse ? effectiveRate : -effectiveRate) * 64));
     targetRPM = Math.max(1, Math.min(127, targetRPM));
-    midi.sendShortMsg(0xB0 | (ch - 1), 105, targetRPM);
-    midi.sendShortMsg(0xB0 | (ch - 1), 67, 127);
-    midi.sendShortMsg(0xB0, 74, 20);
-    midi.sendShortMsg(0xB0, 75, 20);
+
+    // Fix 1: Change-Only Updates (Eliminate flooding)
+    if (targetRPM !== NS7III.lastSentRPM[side]) {
+        midi.sendShortMsg(0xB0 | (ch - 1), 105, targetRPM);
+        NS7III.lastSentRPM[side] = targetRPM;
+    }
 };
 
 NS7III._onPlayChange = function(v, g, k) { 
@@ -71,7 +81,13 @@ NS7III.motorStart = function(side) {
     var ch = NS7III.MOTOR_CH[side];
     var deck = NS7III.deckForSide(side); 
     if (engine.isScratching(deck)) engine.scratchDisable(deck, false); 
+    
+    // Commands moved here: Send motor "Start" and "Keep-Alive" once
+    midi.sendShortMsg(0xB0 | (ch - 1), 67, 127);
+    midi.sendShortMsg(0xB0, 74, 20);
+    midi.sendShortMsg(0xB0, 75, 20);
     midi.sendShortMsg(0xB0, 75, 0); 
+
     NS7III.motorRunning[side] = true; 
     NS7III.syncPhysicalMotor(side, engine.getValue("[Channel"+deck+"]", "rate")); 
 };
@@ -92,7 +108,10 @@ NS7III.jogSpin = function(c, n, v, s, g) {
     var deck = NS7III.deckForSide(side);
     var delta = v - NS7III.jogLastCoarse[side];
     if (delta > 64) delta -= 128; else if (delta < -64) delta += 128;
+    
     NS7III.jogLastDelta[side] = delta; 
+    NS7III.lastSpinTime[side] = new Date().getTime(); 
+    
     if (NS7III.isTouching[side]) engine.scratchTick(deck, delta);
     NS7III.jogLastCoarse[side] = v;
 };
@@ -104,24 +123,29 @@ NS7III.jogPB = function(c, n, v, s, g) {
     var currentPB = (v << 7) | n;
     var deltaPB = currentPB - NS7III.jogLastPB[side];
     if (deltaPB > 8192) deltaPB -= 16384; else if (deltaPB < -8192) deltaPB += 16384;
-    var slipError = Math.abs(deltaPB - (NS7III.jogLastDelta[side] * NS7III.PB_RATIO));
-    if (slipError > 800 || (NS7III.jogLastDelta[side] === 0 && NS7III.motorRunning[side])) {
-        NS7III.confirmCount[side]++;
-        if (NS7III.confirmCount[side] >= 3) {
-            if (!NS7III.isTouching[side]) { 
-                engine.scratchEnable(deck, NS7III.RES, 33.333, 1.0, 1.0/32.0, false, false); 
-                NS7III.isTouching[side] = true; 
-            }
-            if (NS7III.touchTimer[side]) engine.stopTimer(NS7III.touchTimer[side]);
-            NS7III.touchTimer[side] = engine.beginTimer(50, function() {
-                NS7III.touchTimer[side] = 0; 
-                NS7III.isTouching[side] = false;
-                NS7III.confirmCount[side] = 0; 
-                engine.scratchDisable(deck, true);
-            }, true);
+    
+    var now = new Date().getTime();
+    var effectiveHandDelta = (now - NS7III.lastSpinTime[side] > 30) ? 0 : NS7III.jogLastDelta[side];
+    var slipError = Math.abs(deltaPB - (effectiveHandDelta * NS7III.PB_RATIO));
+    
+    // Slip Detected (Grabbing or Moving the vinyl against the motor)
+    if (slipError > 500 || (effectiveHandDelta === 0 && NS7III.motorRunning[side] && Math.abs(deltaPB) > 100)) {
+        NS7III.releaseConfidence[side] = 0; // Reset release counter on any slip packet
+        if (!NS7III.isTouching[side]) { 
+            engine.scratchEnable(deck, NS7III.RES, 33.333, 1.0, 1.0/32.0, false, false); 
+            NS7III.isTouching[side] = true; 
         }
     } else { 
-        if (NS7III.confirmCount[side] > 0) NS7III.confirmCount[side]--; 
+        // Sync Detected (Vinyl is spinning at motor speed)
+        if (NS7III.isTouching[side]) {
+            NS7III.releaseConfidence[side]++;
+            // Exit Confidence: Require 8 consecutive packets of perfect sync to release
+            if (NS7III.releaseConfidence[side] >= 8) {
+                NS7III.isTouching[side] = false;
+                NS7III.releaseConfidence[side] = 0;
+                engine.scratchDisable(deck, true);
+            }
+        }
     }
     NS7III.jogLastPB[side] = currentPB;
 };
@@ -145,6 +169,20 @@ NS7III.fxBeatsLSB = function(channel, control, value, status, group) {
 
 NS7III.filterToggle = function(channel, control, value, status, group) {
     if (value > 0) engine.setValue(group, "filter_enabled", !engine.getValue(group, "filter_enabled"));
+};
+
+NS7III.pitchRange = function(channel, control, value, status, group) {
+    if (value === 0) return;
+    var ranges = [0.08, 0.16, 0.50];
+    var current = engine.getValue(group, "rateRange");
+    var nextIndex = 0;
+    for (var i = 0; i < ranges.length; i++) {
+        if (Math.abs(current - ranges[i]) < 0.01) {
+            nextIndex = (i + 1) % ranges.length;
+            break;
+        }
+    }
+    engine.setValue(group, "rateRange", ranges[nextIndex]);
 };
 
 // Pads
@@ -207,21 +245,42 @@ NS7III.needleSearch = function(c, n, v, s, g) {
     var side = (s & 0x0F) - 1; 
     engine.setValue("[Channel"+NS7III.deckForSide(side)+"]", "playposition", v / 127.0); 
 };
-NS7III.pitch = function(d, n, v) { 
-    var norm = (v - 63.5) / 63.5; 
-    if (Math.abs(norm) < 0.01) norm = 0; 
-    engine.setValue("[Channel" + d + "]", "rate", norm); 
-    NS7III.syncPhysicalMotor(NS7III._sideForDeck(d), norm); 
+
+// 14-Bit High-Res Pitch Implementation
+NS7III.pitch = function(channel, control, value, status, group) { 
+    var side = (channel & 0x0F) - 1; 
+    var fullVal = (value << 7) | NS7III.lsbPitch[side];
+    // Center is 8192. Calculation: (Center - Current) / Center
+    var norm = (8192.0 - fullVal) / 8192.0; 
+    if (Math.abs(norm) < 0.001) norm = 0; 
+    
+    var deck = NS7III.deckForSide(side);
+    engine.setValue("[Channel" + deck + "]", "rate", norm); 
+    NS7III.syncPhysicalMotor(side, norm); 
+};
+
+NS7III.pitchLSB = function(channel, control, value, status, group) {
+    var side = (channel & 0x0F) - 1;
+    NS7III.lsbPitch[side] = value;
 };
 NS7III.pitchA = function(c, n, v) { NS7III.pitch(NS7III.leftDeck, n, v); };
 NS7III.pitchB = function(c, n, v) { NS7III.pitch(NS7III.rightDeck, n, v); };
 NS7III.paramLeft = function(c, n, v) { if (v > 0) engine.setValue("[Channel" + c + "]", "loop_halve", 1); };
 NS7III.paramRight = function(c, n, v) { if (v > 0) engine.setValue("[Channel" + c + "]", "loop_double", 1); };
 
-NS7III.deckSel1 = function(v) { if(v>0) { NS7III.leftDeck = 1; NS7III._updatePadModeLeds(0); NS7III._refreshPadColors(0); } };
-NS7III.deckSel2 = function(v) { if(v>0) { NS7III.rightDeck = 2; NS7III._updatePadModeLeds(1); NS7III._refreshPadColors(1); } };
-NS7III.deckSel3 = function(v) { if(v>0) { NS7III.leftDeck = 3; NS7III._updatePadModeLeds(0); NS7III._refreshPadColors(0); } };
-NS7III.deckSel4 = function(v) { if(v>0) { NS7III.rightDeck = 4; NS7III._updatePadModeLeds(1); NS7III._refreshPadColors(1); } };
+NS7III.deckSel1 = function(v) { if(v>0) { NS7III.leftDeck = 1; NS7III._updatePadModeLeds(0); NS7III._refreshPadColors(0); NS7III._updateDeckLeds(); } };
+NS7III.deckSel2 = function(v) { if(v>0) { NS7III.rightDeck = 2; NS7III._updatePadModeLeds(1); NS7III._refreshPadColors(1); NS7III._updateDeckLeds(); } };
+NS7III.deckSel3 = function(v) { if(v>0) { NS7III.leftDeck = 3; NS7III._updatePadModeLeds(0); NS7III._refreshPadColors(0); NS7III._updateDeckLeds(); } };
+NS7III.deckSel4 = function(v) { if(v>0) { NS7III.rightDeck = 4; NS7III._updatePadModeLeds(1); NS7III._refreshPadColors(1); NS7III._updateDeckLeds(); } };
+
+NS7III._updateDeckLeds = function() {
+    // Left Side (Decks 1 & 3)
+    midi.sendShortMsg(0x90, 2, (NS7III.leftDeck === 1) ? 0x7F : 0x00);
+    midi.sendShortMsg(0x90, 4, (NS7III.leftDeck === 3) ? 0x7F : 0x00);
+    // Right Side (Decks 2 & 4)
+    midi.sendShortMsg(0x90, 3, (NS7III.rightDeck === 2) ? 0x7F : 0x00);
+    midi.sendShortMsg(0x90, 5, (NS7III.rightDeck === 4) ? 0x7F : 0x00);
+};
 
 NS7III.play = function(c) { 
     var s = NS7III._sideForDeck(c);
@@ -259,15 +318,17 @@ NS7III._onBlinkTick = function() {
     for (var s = 0; s < 2; s++) NS7III._refreshPadColors(s); 
 };
 NS7III._updatePadModeLeds = function(side) { 
-    var s = 0x91 + side; 
+    var deck = NS7III.deckForSide(side);
+    var s = 0x90 + deck; // Use the actual deck number for the MIDI channel (1-4 -> 0x91-0x94)
     midi.sendShortMsg(s, 79, NS7III.padMode[side]==="hotcue"?NS7III.COL_GREEN:NS7III.COL_OFF); 
     midi.sendShortMsg(s, 114, NS7III.padMode[side]==="autoloop"?NS7III.COL_BLUE:NS7III.COL_OFF); 
     midi.sendShortMsg(s, 80, NS7III.padMode[side]==="roll"?NS7III.COL_RED:NS7III.COL_OFF); 
     midi.sendShortMsg(s, 81, NS7III.padMode[side]==="manualloop"?NS7III.COL_YELLOW:NS7III.COL_OFF); 
 };
+
 NS7III._refreshPadColors = function(side) { 
     var deck = NS7III.deckForSide(side);
-    var s = 0x91 + side;
+    var s = 0x90 + deck; // 0x91, 0x92, 0x93, 0x94
     var group = "[Channel" + deck + "]"; 
     var mode = NS7III.padMode[side]; 
     for (var i = 1; i <= 8; i++) { 
@@ -293,12 +354,12 @@ NS7III._refreshPadColors = function(side) {
 NS7III._connectLedsForDeck = function(deck) {
     var g = "[Channel" + deck + "]";
     var side = NS7III._sideForDeck(deck);
-    var s = 0x91 + side;
+    var s = 0x90 + deck; 
     if (engine.getValue(g, "play") === undefined) return;
 
     [["52","play_indicator"],["51","cue_indicator"],["50","sync_enabled"]].forEach(function(m){ 
         var conn = engine.makeConnection(g, m[1], function(v){ 
-            if(NS7III.deckForSide(side) === deck) midi.sendShortMsg(s, parseInt(m[0], 10), v?0x7F:0x00); 
+            midi.sendShortMsg(s, parseInt(m[0], 10), v?0x7F:0x00); 
         });
         if (conn) conn.trigger();
     });
@@ -342,6 +403,7 @@ NS7III.init = function() {
     for(var d=1;d<=4;d++) NS7III._connectLedsForDeck(d);
     NS7III._updatePadModeLeds(0); 
     NS7III._updatePadModeLeds(1);
+    NS7III._updateDeckLeds(); // Initialize the 1, 2, 3, 4 LEDs
     NS7III.blinkTimer = engine.beginTimer(500, NS7III._onBlinkTick);
 };
 
@@ -350,5 +412,7 @@ NS7III.shutdown = function() {
     for(var s=0;s<2;s++) { 
         if (NS7III.motorRunning[s]) NS7III.motorStop(s); 
     }
+    // Clear Deck Select LEDs
+    for(var i=2;i<=5;i++) midi.sendShortMsg(0x90, i, 0x00);
     for(var n=2;n<=5;n++) midi.sendShortMsg(0x90, n, 0x00);
 };
