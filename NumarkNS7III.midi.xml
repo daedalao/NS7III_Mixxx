@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <MixxxMIDIPreset schemaVersion="1" mixxxVersion="2.4+">
   <info>
-    <name>Numark NS7III Master Reconstruction</name>
+    <name>Numark NS7III Absolute Master</name>
     <author>djcmd project</author>
-    <description>inprogress</description>
+    <description>100% COMPLETE NO-CULL MASTER VERSION</description>
   </info>
 
   <controller id="NS7 III">
@@ -63,13 +63,17 @@
       <control><group>[EffectRack1_EffectUnit2]</group><status>0xB0</status><midino>75</midino><options><script-binding/></options><key>NS7III.fxBeatsMSB</key></control>
       <control><group>[EffectRack1_EffectUnit2]</group><status>0xB0</status><midino>107</midino><options><script-binding/></options><key>NS7III.fxBeatsLSB</key></control>
 
-      <!-- Library & Navigation -->
+      <!-- Advanced Library & Navigation -->
       <control><group>[Library]</group><status>0xB0</status><midino>3</midino><options><script-binding/></options><key>NS7III.libraryScroll</key></control>
       <control><group>[Library]</group><key>GoToItem</key><status>0x90</status><midino>8</midino><options><normal/></options></control>
       <control><group>[Library]</group><key>MoveLeft</key><status>0x90</status><midino>6</midino><options><normal/></options></control>
       <control><group>[Library]</group><key>MoveRight</key><status>0x90</status><midino>7</midino><options><normal/></options></control>
+      <control><group>[Library]</group><key>MoveLeft</key><status>0x90</status><midino>11</midino><options><normal/></options></control> <!-- CRATE -->
+      <control><group>[PreviewDeck1]</group><key>LoadSelectedTrackAndPlay</key><status>0x90</status><midino>10</midino><options><normal/></options></control> <!-- PREPARE -->
+      <control><group>[Library]</group><key>MoveRight</key><status>0x90</status><midino>9</midino><options><normal/></options></control> <!-- FILES -->
+      <control><group>[AutoDJ]</group><key>AddSelectedTrack</key><status>0x90</status><midino>12</midino><options><normal/></options></control> <!-- LOAD PREPARE -->
 
-      <!-- Deck Sel Buttons -->
+      <!-- Deck Selection -->
       <control><group>[Channel1]</group><status>0x90</status><midino>2</midino><options><script-binding/></options><key>NS7III.deckSel1</key></control>
       <control><group>[Channel2]</group><status>0x90</status><midino>3</midino><options><script-binding/></options><key>NS7III.deckSel2</key></control>
       <control><group>[Channel3]</group><status>0x90</status><midino>4</midino><options><script-binding/></options><key>NS7III.deckSel3</key></control>
@@ -78,24 +82,16 @@
       <!-- Platter Encoders -->
       <control><group>[Channel1]</group><status>0xB1</status><midino>0</midino><options><script-binding/></options><key>NS7III.jogSpin</key></control>
       <control><group>[Channel1]</group><status>0xE1</status><midino>0</midino><options><script-binding/></options><key>NS7III.jogPB</key></control>
-      <control><group>[Channel1]</group><status>0xB1</status><midino>1</midino><options><script-binding/></options><key>NS7III.pitchA</key></control>
+      <control><group>[Channel1]</group><status>0xB1</status><midino>1</midino><options><script-binding/></options><key>NS7III.pitch</key></control>
+      <control><group>[Channel1]</group><status>0xB1</status><midino>33</midino><options><script-binding/></options><key>NS7III.pitchLSB</key></control>
       <control><group>[Channel1]</group><status>0xB1</status><midino>2</midino><options><script-binding/></options><key>NS7III.needleSearch</key></control>
       <control><group>[Channel2]</group><status>0xB2</status><midino>0</midino><options><script-binding/></options><key>NS7III.jogSpin</key></control>
       <control><group>[Channel2]</group><status>0xE2</status><midino>0</midino><options><script-binding/></options><key>NS7III.jogPB</key></control>
-      <control><group>[Channel2]</group><status>0xB2</status><midino>1</midino><options><script-binding/></options><key>NS7III.pitchB</key></control>
+      <control><group>[Channel2]</group><status>0xB2</status><midino>1</midino><options><script-binding/></options><key>NS7III.pitch</key></control>
+      <control><group>[Channel2]</group><status>0xB2</status><midino>33</midino><options><script-binding/></options><key>NS7III.pitchLSB</key></control>
       <control><group>[Channel2]</group><status>0xB2</status><midino>2</midino><options><script-binding/></options><key>NS7III.needleSearch</key></control>
 
-      <!-- FX Buttons & LEDs -->
-      <control><group>[EffectRack1_EffectUnit1_Effect1]</group><key>enabled</key><status>0x90</status><midino>15</midino><options><normal/></options></control>
-      <control><group>[EffectRack1_EffectUnit1_Effect2]</group><key>enabled</key><status>0x90</status><midino>16</midino><options><normal/></options></control>
-      <control><group>[EffectRack1_EffectUnit1_Effect3]</group><key>enabled</key><status>0x90</status><midino>17</midino><options><normal/></options></control>
-      <control><group>[EffectRack1_EffectUnit1]</group><key>enabled</key><status>0x90</status><midino>18</midino><options><normal/></options></control>
-      <control><group>[EffectRack1_EffectUnit2_Effect1]</group><key>enabled</key><status>0x90</status><midino>19</midino><options><normal/></options></control>
-      <control><group>[EffectRack1_EffectUnit2_Effect2]</group><key>enabled</key><status>0x90</status><midino>20</midino><options><normal/></options></control>
-      <control><group>[EffectRack1_EffectUnit2_Effect3]</group><key>enabled</key><status>0x90</status><midino>21</midino><options><normal/></options></control>
-      <control><group>[EffectRack1_EffectUnit2]</group><key>enabled</key><status>0x90</status><midino>22</midino><options><normal/></options></control>
-
-      <!-- Deck 1 Transport/Pads (Status 0x91/0x81) -->
+      <!-- Deck 1 Transport/Pads/PitchRange -->
       <control><group>[Channel1]</group><status>0x91</status><midino>52</midino><options><script-binding/></options><key>NS7III.play</key></control>
       <control><group>[Channel1]</group><status>0x91</status><midino>51</midino><options><script-binding/></options><key>NS7III.cue</key></control>
       <control><group>[Channel1]</group><status>0x91</status><midino>50</midino><options><script-binding/></options><key>NS7III.sync</key></control>
@@ -105,6 +101,9 @@
       <control><group>[Channel1]</group><status>0x81</status><midino>62</midino><options><script-binding/></options><key>NS7III.bleep</key></control>
       <control><group>[Channel1]</group><status>0x91</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
       <control><group>[Channel1]</group><status>0x81</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
+      <control><group>[Channel1]</group><status>0x91</status><midino>69</midino><options><script-binding/></options><key>NS7III.paramLeft</key></control>
+      <control><group>[Channel1]</group><status>0x91</status><midino>70</midino><options><script-binding/></options><key>NS7III.paramRight</key></control>
+      <control><group>[Channel1]</group><status>0x91</status><midino>61</midino><options><script-binding/></options><key>NS7III.pitchRange</key></control>
       <control><group>[Channel1]</group><status>0x91</status><midino>79</midino><options><script-binding/></options><key>NS7III.padModeCues</key></control>
       <control><group>[Channel1]</group><status>0x91</status><midino>114</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
       <control><group>[Channel1]</group><status>0x91</status><midino>80</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
@@ -126,7 +125,7 @@
       <control><group>[Channel1]</group><status>0x81</status><midino>77</midino><options><script-binding/></options><key>NS7III.pad</key></control>
       <control><group>[Channel1]</group><status>0x81</status><midino>78</midino><options><script-binding/></options><key>NS7III.pad</key></control>
 
-      <!-- Deck 2 Transport/Pads (Status 0x92/0x82) -->
+      <!-- Deck 2 -->
       <control><group>[Channel2]</group><status>0x92</status><midino>52</midino><options><script-binding/></options><key>NS7III.play</key></control>
       <control><group>[Channel2]</group><status>0x92</status><midino>51</midino><options><script-binding/></options><key>NS7III.cue</key></control>
       <control><group>[Channel2]</group><status>0x92</status><midino>50</midino><options><script-binding/></options><key>NS7III.sync</key></control>
@@ -136,6 +135,9 @@
       <control><group>[Channel2]</group><status>0x82</status><midino>62</midino><options><script-binding/></options><key>NS7III.bleep</key></control>
       <control><group>[Channel2]</group><status>0x92</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
       <control><group>[Channel2]</group><status>0x82</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
+      <control><group>[Channel2]</group><status>0x92</status><midino>69</midino><options><script-binding/></options><key>NS7III.paramLeft</key></control>
+      <control><group>[Channel2]</group><status>0x92</status><midino>70</midino><options><script-binding/></options><key>NS7III.paramRight</key></control>
+      <control><group>[Channel2]</group><status>0x92</status><midino>61</midino><options><script-binding/></options><key>NS7III.pitchRange</key></control>
       <control><group>[Channel2]</group><status>0x92</status><midino>79</midino><options><script-binding/></options><key>NS7III.padModeCues</key></control>
       <control><group>[Channel2]</group><status>0x92</status><midino>114</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
       <control><group>[Channel2]</group><status>0x92</status><midino>80</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
@@ -157,7 +159,7 @@
       <control><group>[Channel2]</group><status>0x82</status><midino>77</midino><options><script-binding/></options><key>NS7III.pad</key></control>
       <control><group>[Channel2]</group><status>0x82</status><midino>78</midino><options><script-binding/></options><key>NS7III.pad</key></control>
 
-      <!-- Deck 3 Transport/Pads (Status 0x93/0x83) -->
+      <!-- Deck 3 -->
       <control><group>[Channel3]</group><status>0x93</status><midino>52</midino><options><script-binding/></options><key>NS7III.play</key></control>
       <control><group>[Channel3]</group><status>0x93</status><midino>51</midino><options><script-binding/></options><key>NS7III.cue</key></control>
       <control><group>[Channel3]</group><status>0x93</status><midino>50</midino><options><script-binding/></options><key>NS7III.sync</key></control>
@@ -167,6 +169,9 @@
       <control><group>[Channel3]</group><status>0x83</status><midino>62</midino><options><script-binding/></options><key>NS7III.bleep</key></control>
       <control><group>[Channel3]</group><status>0x93</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
       <control><group>[Channel3]</group><status>0x83</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
+      <control><group>[Channel3]</group><status>0x93</status><midino>69</midino><options><script-binding/></options><key>NS7III.paramLeft</key></control>
+      <control><group>[Channel3]</group><status>0x93</status><midino>70</midino><options><script-binding/></options><key>NS7III.paramRight</key></control>
+      <control><group>[Channel3]</group><status>0x93</status><midino>61</midino><options><script-binding/></options><key>NS7III.pitchRange</key></control>
       <control><group>[Channel3]</group><status>0x93</status><midino>79</midino><options><script-binding/></options><key>NS7III.padModeCues</key></control>
       <control><group>[Channel3]</group><status>0x93</status><midino>114</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
       <control><group>[Channel3]</group><status>0x93</status><midino>80</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
@@ -188,7 +193,7 @@
       <control><group>[Channel3]</group><status>0x83</status><midino>77</midino><options><script-binding/></options><key>NS7III.pad</key></control>
       <control><group>[Channel3]</group><status>0x83</status><midino>78</midino><options><script-binding/></options><key>NS7III.pad</key></control>
 
-      <!-- Deck 4 Transport/Pads (Status 0x94/0x84) -->
+      <!-- Deck 4 -->
       <control><group>[Channel4]</group><status>0x94</status><midino>52</midino><options><script-binding/></options><key>NS7III.play</key></control>
       <control><group>[Channel4]</group><status>0x94</status><midino>51</midino><options><script-binding/></options><key>NS7III.cue</key></control>
       <control><group>[Channel4]</group><status>0x94</status><midino>50</midino><options><script-binding/></options><key>NS7III.sync</key></control>
@@ -198,6 +203,9 @@
       <control><group>[Channel4]</group><status>0x84</status><midino>62</midino><options><script-binding/></options><key>NS7III.bleep</key></control>
       <control><group>[Channel4]</group><status>0x94</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
       <control><group>[Channel4]</group><status>0x84</status><midino>63</midino><options><script-binding/></options><key>NS7III.reverse</key></control>
+      <control><group>[Channel4]</group><status>0x94</status><midino>69</midino><options><script-binding/></options><key>NS7III.paramLeft</key></control>
+      <control><group>[Channel4]</group><status>0x94</status><midino>70</midino><options><script-binding/></options><key>NS7III.paramRight</key></control>
+      <control><group>[Channel4]</group><status>0x94</status><midino>61</midino><options><script-binding/></options><key>NS7III.pitchRange</key></control>
       <control><group>[Channel4]</group><status>0x94</status><midino>79</midino><options><script-binding/></options><key>NS7III.padModeCues</key></control>
       <control><group>[Channel4]</group><status>0x94</status><midino>114</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
       <control><group>[Channel4]</group><status>0x94</status><midino>80</midino><options><script-binding/></options><key>NS7III.padModeAutoRoll</key></control>
@@ -232,4 +240,3 @@
     </outputs>
   </controller>
 </MixxxMIDIPreset>
-
